@@ -5,14 +5,18 @@
 **Fixed a bug where changes were not applied only to the player. Changed body part health calculation to use float type.**
 
 
-Original mod by Jdalt40
-https://steamcommunity.com/sharedfiles/filedetails/?id=1703452618
-Previous forked version by ♫LP
-https://steamcommunity.com/sharedfiles/filedetails/?id=2574042900
-Continuation by garfu
-https://steamcommunity.com/sharedfiles/filedetails/?id=2913407722
-Continuation by Zaljerem
-https://steamcommunity.com/sharedfiles/filedetails/?id=3263017689
+Original mod by [Jdalt40](https://steamcommunity.com/sharedfiles/filedetails/?id=1703452618)
+
+
+Previous forked version by [♫LP](https://steamcommunity.com/sharedfiles/filedetails/?id=2574042900)
+
+
+Continuation by [garfu](https://steamcommunity.com/sharedfiles/filedetails/?id=2913407722)
+
+
+Continuation by [Zaljerem](https://steamcommunity.com/sharedfiles/filedetails/?id=3263017689)
+
+
 
 If the original author requests it, I will remove this update.
 
