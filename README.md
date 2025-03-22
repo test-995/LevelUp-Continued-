@@ -4,6 +4,8 @@
 
 **Fixed a bug where changes were not applied only to the player. Changed body part health calculation to use float type.**
 
+**可自行修改编译，或下载LevelUp.dll复制到创意工坊文件目录\1.5\Assemblies**
+
 
 Original mod by [Jdalt40](https://steamcommunity.com/sharedfiles/filedetails/?id=1703452618)
 
