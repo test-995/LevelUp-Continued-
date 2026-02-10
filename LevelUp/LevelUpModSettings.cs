@@ -16,6 +16,12 @@ namespace LevelUp
 			Scribe_Values.Look<string>(ref this.LevellingType, "LevellingMode", "Compound Levelling", false);
 			Scribe_Values.Look<string>(ref this.HealthScalingType, "HealthScalingMode", "Compounding Health", false);
 			Scribe_Values.Look<bool>(ref this.playerOnly, "PlayerOnly", true, false);
+			Scribe_Values.Look<bool>(ref this.enableParallelGrowth, "EnableParallelGrowth", true, false);
+			Scribe_Values.Look<bool>(ref this.enableTalentNodes, "EnableTalentNodes", true, false);
+			Scribe_Values.Look<float>(ref this.NonHealthGrowthRate, "NonHealthGrowthRate", 0.0125f, false);
+			Scribe_Values.Look<float>(ref this.DefenseGrowthRate, "DefenseGrowthRate", 0.005f, false);
+			Scribe_Values.Look<bool>(ref this.enableLevelCap, "EnableLevelCap", false, false);
+			Scribe_Values.Look<float>(ref this.MaxLevelCap, "MaxLevelCap", 200f, false);
 			base.ExposeData();
 		}
 
@@ -45,5 +51,17 @@ namespace LevelUp
 
 		// Token: 0x04000010 RID: 16
 		public bool playerOnly = true;
+
+		public bool enableParallelGrowth = true;
+
+		public bool enableTalentNodes = true;
+
+		public float NonHealthGrowthRate = 0.0125f;
+
+		public float DefenseGrowthRate = 0.005f;
+
+		public bool enableLevelCap = false;
+
+		public float MaxLevelCap = 200f;
 	}
 }

@@ -25,6 +25,9 @@ namespace LevelUp
 			Listing_Standard listing_Standard = new Listing_Standard();
 			listing_Standard.Begin(inRect);
 			listing_Standard.CheckboxLabeled("LT_PlayerOnly".Translate(), ref this.settings.playerOnly, null, 0f, 1f);
+			listing_Standard.CheckboxLabeled("Enable Parallel Growth", ref this.settings.enableParallelGrowth, "Scale non-health combat/survival stats with level.", 0f, 1f);
+			listing_Standard.CheckboxLabeled("Enable Talent Nodes", ref this.settings.enableTalentNodes, "Unlock roguelike talent breakpoints by level cap quartiles.", 0f, 1f);
+			listing_Standard.CheckboxLabeled("Enable Level Cap", ref this.settings.enableLevelCap, "Enable hard level cap for this mod.", 0f, 1f);
 			listing_Standard.GapLine(3f);
 			listing_Standard.AddLabeledRadioList("LT_LevellingMode".Translate(), LevelUpMod.LevellingMode, ref this.settings.LevellingType, null);
 			listing_Standard.GapLine(3f);
@@ -34,6 +37,12 @@ namespace LevelUp
 			this.settings.LevelUpRate = listing_Standard.Slider(this.settings.LevelUpRate, 0.001f, 1f);
 			listing_Standard.Label("LT_HealthPerLevelRate".Translate() + ("(" + this.settings.LevelUpHealthRate.ToStringPercent() + ")"), -1f, null);
 			this.settings.LevelUpHealthRate = listing_Standard.Slider(this.settings.LevelUpHealthRate, 0.001f, 1f);
+			listing_Standard.Label("Non-Health Growth / Level" + ("(" + this.settings.NonHealthGrowthRate.ToStringPercent() + ")"), -1f, null);
+			this.settings.NonHealthGrowthRate = listing_Standard.Slider(this.settings.NonHealthGrowthRate, 0.001f, 0.2f);
+			listing_Standard.Label("Defense Growth / Level" + ("(" + this.settings.DefenseGrowthRate.ToStringPercent() + ")"), -1f, null);
+			this.settings.DefenseGrowthRate = listing_Standard.Slider(this.settings.DefenseGrowthRate, 0.001f, 0.1f);
+			listing_Standard.Label("Max Level Cap" + ("(" + Mathf.FloorToInt(this.settings.MaxLevelCap).ToString() + ")"), -1f, null);
+			this.settings.MaxLevelCap = listing_Standard.Slider(this.settings.MaxLevelCap, 100f, 500f);
 			listing_Standard.AddLabeledNumericalTextField("LT_MaximumRandomLevel".Translate(), ref this.settings.MaxRandomLevel, 0.5f, 1f, 1000f);
 			listing_Standard.AddLabeledNumericalTextField("LT_BaseXPRequired".Translate(), ref this.settings.BaseXP, 0.5f, 1f, 100000f);
 			listing_Standard.End();

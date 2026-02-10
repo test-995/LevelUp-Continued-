@@ -107,7 +107,7 @@ namespace LevelUp
 					bool flag25 = flag24;
 					if (flag25)
 					{
-						HealthUtility.AdjustSeverity(pawn, LevellingHediffDefOf.HealthLevel, totalDamageDealt / num6);
+						this.ApplySeverityWithUnlockNotice(pawn, severity, totalDamageDealt / num6);
 					}
 					else
 					{
@@ -115,7 +115,7 @@ namespace LevelUp
 						bool flag27 = flag26;
 						if (flag27)
 						{
-							HealthUtility.AdjustSeverity(pawn, LevellingHediffDefOf.HealthLevel, totalDamageDealt / num7);
+							this.ApplySeverityWithUnlockNotice(pawn, severity, totalDamageDealt / num7);
 						}
 					}
 				}
@@ -164,6 +164,48 @@ namespace LevelUp
 				}
 			}
 		}
+
+
+		private void NotifyTalentUnlocks(Pawn pawn, int oldLevel, int newLevel)
+		{
+			if (!this.settings.enableTalentNodes || pawn == null || pawn.Faction == null || !pawn.Faction.IsPlayer)
+			{
+				return;
+			}
+
+			int maxLevel = Mathf.Max(1, Mathf.FloorToInt(this.settings.MaxLevelCap));
+			int step = Mathf.Max(1, Mathf.FloorToInt((float)maxLevel / 4f));
+			for (int i = 1; i <= 4; i++)
+			{
+				int threshold = step * i;
+				if (oldLevel < threshold && newLevel >= threshold)
+				{
+					Messages.Message(pawn.Name.ToStringShort + " unlocked Talent " + i.ToString() + " at Lv." + threshold.ToString(), pawn, MessageTypeDefOf.PositiveEvent, true);
+				}
+			}
+		}
+
+		private void ApplySeverityWithUnlockNotice(Pawn pawn, float currentSeverity, float severityDelta)
+		{
+			int oldLevel = Mathf.FloorToInt(currentSeverity);
+			float targetSeverity = currentSeverity + severityDelta;
+			if (this.settings.enableLevelCap)
+			{
+				float levelCap = Mathf.Clamp(this.settings.MaxLevelCap, 100f, 500f);
+				targetSeverity = Mathf.Min(targetSeverity, levelCap);
+			}
+
+			float appliedDelta = targetSeverity - currentSeverity;
+			if (appliedDelta <= 0f)
+			{
+				return;
+			}
+
+			int newLevel = Mathf.FloorToInt(targetSeverity);
+			HealthUtility.AdjustSeverity(pawn, LevellingHediffDefOf.HealthLevel, appliedDelta);
+			this.NotifyTalentUnlocks(pawn, oldLevel, newLevel);
+		}
+
 
 		// Token: 0x04000002 RID: 2
 		private LevelUpModSettings settings = LoadedModManager.GetMod<LevelUpMod>().GetSettings<LevelUpModSettings>();

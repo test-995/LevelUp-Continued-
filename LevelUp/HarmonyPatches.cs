@@ -25,6 +25,18 @@ namespace LevelUp
             new HarmonyMethod(typeof(HarmonyPatches), "GetPartHealth_Postfix"), // 前置方法（Prefix），这里不修改
             null // 后置方法（Postfix）
 			);
+            harmony.Patch(
+            AccessTools.Method(typeof(StatExtension), "GetStatValue", new Type[]
+            {
+                typeof(Thing),
+                typeof(StatDef),
+                typeof(bool)
+            }),
+            null,
+            new HarmonyMethod(typeof(HarmonyPatches), "GetStatValue_Postfix"),
+            null,
+            null
+            );
         }
         public static bool GetPartHealth_Postfix(HediffSet __instance, BodyPartRecord part, ref float __result)
 		{
@@ -66,6 +78,136 @@ namespace LevelUp
         }
 
 
+        private static int GetPawnLevel(Pawn pawn)
+        {
+            if (pawn == null || pawn.health == null || pawn.health.hediffSet == null)
+            {
+                return 0;
+            }
+            Hediff hediff = pawn.health.hediffSet.GetFirstHediffOfDef(LevellingHediffDefOf.HealthLevel, false);
+            if (hediff == null)
+            {
+                return 0;
+            }
+            return Mathf.Max(0, Mathf.FloorToInt(hediff.Severity));
+        }
+
+        private static int GetEffectiveLevel(LevelUpModSettings settings, int level)
+        {
+            if (!settings.enableLevelCap)
+            {
+                return level;
+            }
+            int cap = Mathf.Clamp(Mathf.FloorToInt(settings.MaxLevelCap), 100, 500);
+            return Mathf.Min(level, cap);
+        }
+
+        private static int GetTalentTier(LevelUpModSettings settings, int level)
+        {
+            int cap = Mathf.Clamp(Mathf.FloorToInt(settings.MaxLevelCap), 100, 500);
+            int step = Mathf.Max(1, Mathf.FloorToInt((float)cap / 4f));
+            int tier = 0;
+            for (int i = 1; i <= 4; i++)
+            {
+                if (level >= step * i)
+                {
+                    tier = i;
+                }
+            }
+            return tier;
+        }
+
+        private static float GetTalentMultiplier(LevelUpModSettings settings, int level, string statDefName)
+        {
+            if (!settings.enableTalentNodes)
+            {
+                return 1f;
+            }
+
+            int tier = GetTalentTier(settings, level);
+            float mult = 1f;
+
+            if (tier >= 1)
+            {
+                if (statDefName == "MoveSpeed" || statDefName == "BleedRate")
+                {
+                    mult *= (statDefName == "MoveSpeed") ? 1.06f : 0.93f;
+                }
+            }
+            if (tier >= 2)
+            {
+                if (statDefName == "MeleeHitChance" || statDefName == "ShootingAccuracyPawn")
+                {
+                    mult *= 1.08f;
+                }
+            }
+            if (tier >= 3)
+            {
+                if (statDefName == "IncomingDamageFactor")
+                {
+                    mult *= 0.90f;
+                }
+            }
+            if (tier >= 4)
+            {
+                if (statDefName == "CarryingCapacity" || statDefName == "WorkSpeedGlobal")
+                {
+                    mult *= 1.10f;
+                }
+            }
+
+            return mult;
+        }
+
+        public static void GetStatValue_Postfix(Thing thing, StatDef stat, bool applyPostProcess, ref float __result)
+        {
+            Pawn pawn = thing as Pawn;
+            if (pawn == null || stat == null)
+            {
+                return;
+            }
+
+            LevelUpModSettings settings = LoadedModManager.GetMod<LevelUpMod>().GetSettings<LevelUpModSettings>();
+            if (!settings.enableParallelGrowth)
+            {
+                return;
+            }
+
+            int level = GetEffectiveLevel(settings, GetPawnLevel(pawn));
+            if (level <= 0)
+            {
+                return;
+            }
+
+            string defName = stat.defName;
+            float growth = settings.NonHealthGrowthRate * (float)level;
+
+            if (defName == "MoveSpeed")
+            {
+                __result *= 1f + growth * 0.5f;
+            }
+            else if (defName == "WorkSpeedGlobal")
+            {
+                __result *= 1f + growth;
+            }
+            else if (defName == "ShootingAccuracyPawn")
+            {
+                __result *= 1f + growth * 0.75f;
+            }
+            else if (defName == "MeleeHitChance")
+            {
+                __result *= 1f + growth * 0.85f;
+            }
+            else if (defName == "IncomingDamageFactor")
+            {
+                __result *= Mathf.Max(0.2f, 1f - settings.DefenseGrowthRate * (float)level);
+            }
+
+            __result *= GetTalentMultiplier(settings, level, defName);
+        }
+
+
+
         public static void LevelUpHealthScale(Pawn __instance, ref float __result)
 		{
 
@@ -87,6 +229,10 @@ namespace LevelUp
 					Log.Message("LT_LevelNegative".Translate());
 				}
 				int num2 = Mathf.FloorToInt(firstHediffOfDef.Severity);
+				if (settings.enableLevelCap)
+				{
+					num2 = Mathf.Min(num2, Mathf.Clamp(Mathf.FloorToInt(settings.MaxLevelCap), 100, 500));
+				}
 				float num3 = (float)Math.Round((double)settings.LevelUpHealthRate, 2);
 				float f = num3 + 1f;
 				bool flag5 = settings.HealthScalingType == "Compounding Health";
